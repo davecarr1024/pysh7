@@ -1,23 +1,27 @@
 from dataclasses import dataclass
 
-from pysh.core.processor.dataclass_builder import DataclassBuilder, Field
+from pysh.core.processor.dataclass_builder import (
+    Field,
+    build_dataclass,
+)
+from pysh.core.processor.literal import Literal
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Object:
-    i: int
-    s: str
+    i: int = 0
+    s: str = ""
 
 
 def test_field():
-    assert Field("i", 2).set(Object(1, "a")) == Object(2, "a")
+    assert Field("i", 1).set(Object()) == Object(i=1)
+    assert Field("s", "a").set(Object()) == Object(s="a")
 
 
-def test_dataclass_builder():
-    assert DataclassBuilder(
-        Object(1, "a"),
-    ).reset().add(
-        Field("i", 2),
-    ).add(
-        Field("s", "b"),
-    ).get() == Object(2, "b")
+def test_build_dataclass():
+    assert build_dataclass(Object())(None).result == Object()
+    assert build_dataclass(
+        Object(),
+        Literal(1).as_field("i"),
+        Literal("a").as_field("s"),
+    )(None).result == Object(i=1, s="a")

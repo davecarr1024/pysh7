@@ -1,8 +1,9 @@
 import dataclasses
-from typing import override
+from typing import Sequence, override
 
 from pysh.core.errors.errorable import Errorable
-from pysh.core.processor.result_builder import ResultBuilder
+from pysh.core.processor.rule import Rule
+from pysh.core.processor.transformer import Transformer
 
 
 @dataclasses.dataclass(frozen=True)
@@ -23,26 +24,25 @@ class Field[Value](Errorable):
         )
 
 
-@dataclasses.dataclass(frozen=True)
-class DataclassBuilder[Result](ResultBuilder[Result, Field | None]):
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class DataclassBuilder[State, Result](
+    Transformer[State, Result, Sequence[Field | None]]
+):
     result: Result
 
     @override
-    def reset(self) -> "DataclassBuilder[Result]":
-        return DataclassBuilder[Result](
-            dataclasses.replace(
-                self.result,  # type: ignore
-            ),
-        )
+    def _transform(self, child_result: Sequence[Field | None]) -> Result:
+        result = self.result
+        for field in child_result:
+            if field is not None:
+                result = field.set(result)
+        return result
 
-    @override
-    def add(self, child_result: Field | None) -> "DataclassBuilder[Result]":
-        match child_result:
-            case Field():
-                return DataclassBuilder[Result](child_result.set(self.result))
-            case None:
-                return self
 
-    @override
-    def get(self) -> Result:
-        return self.result
+def build_dataclass[
+    State, Result
+](result: Result, *children: Rule[State, Field | None]) -> Rule[State, Result]:
+    return DataclassBuilder[State, Result](result=result, child=and_.and_(*children))
+
+
+from pysh.core.processor import and_
