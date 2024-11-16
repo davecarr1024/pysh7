@@ -22,16 +22,18 @@ class Errorable:
     def _try(
         self,
         f: Callable[[], _R],
-        *args: Any,
         type: Type[_Error] = error.Error,
+        msg: str | None = None,
+        *args: Any,
         **kwargs: Any,
     ) -> _R:
         try:
             return f()
         except error.Error as e:
             raise self._error(
-                children=[e],
                 type=type,
+                children=[e],
+                msg=msg,
                 *args,
                 **kwargs,
             )

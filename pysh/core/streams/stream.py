@@ -1,37 +1,34 @@
 from dataclasses import dataclass, field
-from typing import Generic, Iterable, Iterator, Self, Sequence, Sized, TypeVar, override
+from typing import Iterable, Iterator, Self, Sequence, Sized, TypeVar, override
 
 from pysh.core.errors import Error
 from pysh.core.errors.errorable import Errorable
 
-_Item = TypeVar("_Item")
-
 
 @dataclass(frozen=True)
-class Stream(
-    Generic[_Item],
+class Stream[T](
     Sized,
-    Iterable[_Item],
+    Iterable[T],
     Errorable,
 ):
     class Error(Error): ...
 
     class EmptyError(Error): ...
 
-    _items: Sequence[_Item] = field(default_factory=list)
+    _items: Sequence[T] = field(default_factory=list)
 
     @override
     def __len__(self) -> int:
         return len(self._items)
 
     @override
-    def __iter__(self) -> Iterator[_Item]:
+    def __iter__(self) -> Iterator[T]:
         return iter(self._items)
 
     def empty(self) -> bool:
         return len(self) == 0
 
-    def head(self) -> _Item:
+    def head(self) -> T:
         if self.empty():
             raise self._error(
                 type=self.EmptyError,

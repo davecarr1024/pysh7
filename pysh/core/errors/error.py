@@ -1,9 +1,6 @@
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any, Generic, Iterable, Iterator, Optional, Sized, TypeVar, override
-
-
-_Errorable = TypeVar("_Errorable", bound="errorable.Errorable")
+from typing import Any, Iterable, Iterator, Optional, Sized, override
 
 
 @dataclass(
@@ -11,13 +8,12 @@ _Errorable = TypeVar("_Errorable", bound="errorable.Errorable")
     kw_only=True,
     repr=False,
 )
-class Error(
+class Error[Errorable: "errorable.Errorable"](
     Exception,
-    Generic[_Errorable],
     Sized,
     Iterable["Error"],
 ):
-    object: _Errorable
+    object: Errorable
     msg: Optional[str] = None
     children: Sequence["Error"] = field(default_factory=list)
 
