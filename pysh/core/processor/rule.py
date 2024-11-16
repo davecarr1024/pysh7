@@ -1,23 +1,41 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Generic, TypeVar
 from pysh.core.errors.errorable import Errorable
+from pysh.core.processor import and_
 from pysh.core.processor.state_and_result import StateAndResult
 
+_State = TypeVar("_State")
+_Result = TypeVar("_Result", covariant=True)
 
-class Rule[State, Result](ABC, Errorable):
+
+class Rule(Generic[_State, _Result], ABC, Errorable):
     @abstractmethod
-    def __call__(self, state: State) -> StateAndResult[State, Result]: ...
+    def __call__(self, state: _State) -> StateAndResult[_State, _Result]: ...
 
     def transform[
         TransformResult
     ](
-        self, func: Callable[[Result], TransformResult]
-    ) -> "Transformer[State,TransformResult,Result]":
+        self, func: Callable[[_Result], TransformResult]
+    ) -> "Transformer[_State,TransformResult,_Result]":
         return transformer(child=self, func=func)
 
-    def zero_or_more(self) -> "ZeroOrMore[State,Result]":
-        return ZeroOrMore[State, Result](child=self)
+    def zero_or_more(self) -> "ZeroOrMore[_State,_Result]":
+        return ZeroOrMore[_State, _Result](child=self)
+
+    def drop_result(self) -> "Rule[_State,None]":
+        return self.transform(lambda _: None)
+
+    def as_field(self, name: str) -> "Rule[_State,Field[_Result]]":
+        return self.transform(lambda result: Field[_Result](name, result))
+
+    def as_object[
+        Object
+    ](
+        self, object: Object, *children: "Rule[_State,Field|None]"
+    ) -> "Rule[_State,Object]":
+        return and_.and_(DataclassBuilder(object), self)
 
 
 from pysh.core.processor.transformer import Transformer, transformer
 from pysh.core.processor.zero_or_more import ZeroOrMore
+from pysh.core.processor.dataclass_builder import DataclassBuilder, Field

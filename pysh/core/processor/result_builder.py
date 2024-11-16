@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Self
+from dataclasses import dataclass, field
+from typing import Self, Sequence, override
 from pysh.core.errors.errorable import Errorable
 
 
 class ResultBuilder[Result, ChildResult](ABC, Errorable):
     @abstractmethod
-    def add(self, result: ChildResult) -> Self: ...
+    def reset(self) -> Self: ...
+
+    @abstractmethod
+    def add(self, child_result: ChildResult) -> Self: ...
 
     @abstractmethod
     def get(self) -> Result: ...
