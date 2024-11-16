@@ -11,15 +11,15 @@ class Field[Value](Errorable):
     name: str
     value: Value
 
-    def set[Result](self, result: Result) -> Result:
-        if not dataclasses.is_dataclass(result):
-            raise self._error(msg=f"setting field on non-dataclass {result}")
-        if not any(field.name == self.name for field in dataclasses.fields(result)):
+    def set[Object](self, object: Object) -> Object:
+        if not dataclasses.is_dataclass(object):
+            raise self._error(msg=f"setting field on non-dataclass {object}")
+        if not any(field.name == self.name for field in dataclasses.fields(object)):
             raise self._error(
-                msg=f"trying to set unknown field {self.name} on dataclass {result}"
+                msg=f"trying to set unknown field {self.name} on dataclass {object}"
             )
         return dataclasses.replace(
-            result,  # type: ignore
+            object,  # type: ignore
             **{self.name: self.value},
         )
 

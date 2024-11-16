@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, TypeVar
+from typing import Callable, Generic, Sequence, TypeVar, Union, overload
 from pysh.core.errors.errorable import Errorable
 from pysh.core.processor.state_and_result import StateAndResult
 
@@ -27,7 +27,17 @@ class Rule(Generic[_State, _Result], ABC, Errorable):
     def as_field(self, name: str) -> "Rule[_State,Field[_Result]]":
         return self.transform(lambda result: Field[_Result](name, result))
 
+    def __and__[
+        RhsResult
+    ](self, rhs: "Rule[_State,RhsResult]") -> "And[_State,_Result|RhsResult]":
+        match rhs:
+            case And():
+                return and_(self, *rhs.children)
+            case Rule():
+                return and_(self, rhs)
+
 
 from pysh.core.processor.transformer import Transformer, transformer
 from pysh.core.processor.zero_or_more import ZeroOrMore
 from pysh.core.processor.dataclass_builder import Field
+from pysh.core.processor.and_ import and_, And

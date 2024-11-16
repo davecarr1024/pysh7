@@ -1,15 +1,13 @@
-from dataclasses import dataclass
-from pysh.core.processor.and_ import and_
-from pysh.core.processor.dataclass_builder import DataclassBuilder
 from pysh.core.processor.literal import Literal
-from pysh.core.processor.state_and_result import StateAndResult
 
 
-def test_and_list():
-    assert and_(
-        Literal(1),
-        Literal(2),
-        Literal(3),
-    )(
-        None
-    ).result == [1, 2, 3]
+def test_and(subtests):
+    for rule, expected in [
+        (Literal(1) & Literal(2), [1, 2]),
+        (Literal(1) & Literal(2) & Literal(3), [1, 2, 3]),
+        ((Literal(1) & Literal(2)) & Literal(3), [1, 2, 3]),
+        (Literal(1) & (Literal(2) & Literal(3)), [1, 2, 3]),
+        ((Literal(1) & Literal(2)) & (Literal(3) & Literal(4)), [1, 2, 3, 4]),
+    ]:
+        with subtests.test(rule=rule, expected=expected):
+            assert rule(None).result == expected
