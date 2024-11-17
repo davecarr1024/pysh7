@@ -2,8 +2,7 @@ import dataclasses
 from typing import Sequence, override
 
 from pysh.core.errors.errorable import Errorable
-from pysh.core.processor.rule import Rule
-from pysh.core.processor.transformer import Transformer
+from pysh.core.processor import rule, transformer
 
 
 @dataclasses.dataclass(frozen=True)
@@ -26,7 +25,7 @@ class Field[Value](Errorable):
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class DataclassBuilder[State, Result](
-    Transformer[State, Result, Sequence[Field | None]]
+    transformer.Transformer[State, Result, Sequence[Field | None]]
 ):
     result: Result
 
@@ -41,7 +40,9 @@ class DataclassBuilder[State, Result](
 
 def build_dataclass[
     State, Result
-](result: Result, *children: Rule[State, Field | None]) -> Rule[State, Result]:
+](result: Result, *children: rule.Rule[State, Field | None]) -> rule.Rule[
+    State, Result
+]:
     return DataclassBuilder[State, Result](result=result, child=and_.and_(*children))
 
 

@@ -40,5 +40,14 @@ class Rule(Generic[_State, _Result], ABC, Errorable):
             case Rule():
                 return and_.and_(self, rhs)
 
+    def __or__[
+        RhsResult
+    ](self, rhs: "Rule[_State,RhsResult]") -> "or_.Or[_State,_Result|RhsResult]":
+        match rhs:
+            case or_.Or():
+                return or_.or_(self, *rhs.children)
+            case Rule():
+                return or_.or_(self, rhs)
 
-from pysh.core.processor import transformer, zero_or_more, dataclass_builder, and_
+
+from pysh.core.processor import transformer, zero_or_more, dataclass_builder, and_, or_
