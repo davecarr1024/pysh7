@@ -30,6 +30,9 @@ class Rule(Generic[_State, _Result], ABC, Errorable):
             lambda result: dataclass_field.DataclassField[_Result](name).setter(result),
         )
 
+    def as_object[Object](self, object: Object) -> "Rule[_State,Object]":
+        return dataclass_builder.build_dataclass(object, self)
+
     def __and__[
         RhsResult
     ](self, rhs: "Rule[_State,RhsResult]") -> "and_.And[_State,_Result|RhsResult]":
@@ -49,4 +52,11 @@ class Rule(Generic[_State, _Result], ABC, Errorable):
                 return or_.or_(self, rhs)
 
 
-from pysh.core.processor import transformer, zero_or_more, dataclass_field, and_, or_
+from pysh.core.processor import (
+    transformer,
+    zero_or_more,
+    dataclass_field,
+    and_,
+    or_,
+    dataclass_builder,
+)

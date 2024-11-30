@@ -1,9 +1,9 @@
 import dataclasses
-from typing import Sequence, Union, override
+from typing import Any, Sequence, override
 
 from pysh.core.processor import dataclass_field, rule, transformer
 
-type _ChildResult = Union[dataclass_field.DataclassFieldSetter, None]
+type _ChildResult = Any
 type _ChildResults = Sequence[_ChildResult]
 
 
@@ -17,8 +17,11 @@ class DataclassBuilder[State, Result](
     def _transform(self, child_result: _ChildResults) -> Result:
         result = self.result
         for field in child_result:
-            if field is not None:
-                result = field.set(result)
+            match field:
+                case dataclass_field.DataclassFieldSetter():
+                    result = field.set(result)
+                case list() | tuple():
+                    result = self._transform(field)
         return result
 
 

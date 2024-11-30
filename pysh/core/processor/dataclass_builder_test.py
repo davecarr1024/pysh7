@@ -12,10 +12,19 @@ class Object:
     s: str = ""
 
 
-def test_build_dataclass():
+def test_build_empty_dataclass():
     assert build_dataclass(Object())(None) == (None, Object())
+
+
+def test_build_dataclass():
     assert build_dataclass(
         Object(),
         Literal(1).as_field("i"),
         Literal("a").as_field("s"),
     )(None) == (None, Object(i=1, s="a"))
+
+
+def test_build_dataclass_syntax():
+    assert (
+        Literal(1).as_field("i") & Literal(3.14) & Literal("a").as_field("s")
+    ).as_object(Object())(None) == (None, Object(i=1, s="a"))
