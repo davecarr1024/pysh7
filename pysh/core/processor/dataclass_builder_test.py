@@ -13,9 +13,9 @@ class Object:
 
 
 def test_build_dataclass():
-    assert build_dataclass(Object())(None).result == Object()
+    assert build_dataclass(Object())(None) == (None, Object())
     assert build_dataclass(
         Object(),
         Literal(1).as_field("i"),
         Literal("a").as_field("s"),
-    )(None).result == Object(i=1, s="a")
+    )(None) == (None, Object(i=1, s="a"))

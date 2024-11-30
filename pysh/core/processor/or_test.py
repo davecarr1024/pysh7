@@ -6,7 +6,6 @@ import pytest
 from pysh.core.errors.error import Error
 from pysh.core.processor.rule import Rule
 from pysh.core.processor.or_ import or_
-from pysh.core.processor.state_and_result import StateAndResult
 
 
 @dataclass(frozen=True)
@@ -14,10 +13,10 @@ class Eq(Rule[int, None]):
     value: int
 
     @override
-    def __call__(self, state: int) -> StateAndResult[int, None]:
+    def __call__(self, state: int) -> tuple[int, None]:
         if state != self.value:
             raise self._error(msg=f"got {state} expected {self.value}")
-        return StateAndResult[int, None](state, None)
+        return state, None
 
 
 def test_or(subtests):
@@ -32,7 +31,7 @@ def test_or(subtests):
                 with pytest.raises(Error):
                     rule(state)
             else:
-                assert rule(state).state == expected
+                assert rule(state) == (expected, None)
 
 
 def test_combine_rules(subtests):

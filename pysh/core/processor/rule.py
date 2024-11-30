@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Generic, TypeVar
 from pysh.core.errors.errorable import Errorable
-from pysh.core.processor import state_and_result
 
 _State = TypeVar("_State")
 _Result = TypeVar("_Result", covariant=True)
@@ -9,9 +8,7 @@ _Result = TypeVar("_Result", covariant=True)
 
 class Rule(Generic[_State, _Result], ABC, Errorable):
     @abstractmethod
-    def __call__(
-        self, state: _State
-    ) -> state_and_result.StateAndResult[_State, _Result]: ...
+    def __call__(self, state: _State) -> tuple[_State, _Result]: ...
 
     def transform[
         TransformResult

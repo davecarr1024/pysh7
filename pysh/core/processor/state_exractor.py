@@ -2,7 +2,6 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Callable, Optional, override
 from pysh.core.processor import dataclass_field, rule
-from pysh.core.processor.state_and_result import StateAndResult
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -17,11 +16,11 @@ class StateExtractor[State, ChildState, Result](rule.Rule[State, Result]):
         return state
 
     @override
-    def __call__(self, state: State) -> StateAndResult[State, Result]:
+    def __call__(self, state: State) -> tuple[State, Result]:
         child_state = self._get(state)
-        child_state_and_result = self._try(lambda: self.child(child_state))
-        state = self._set(state, child_state_and_result.state)
-        return StateAndResult[State, Result](state, child_state_and_result.result)
+        child_state, child_result = self._try(lambda: self.child(child_state))
+        state = self._set(state, child_state)
+        return state, child_result
 
 
 @dataclass(frozen=True, kw_only=True)

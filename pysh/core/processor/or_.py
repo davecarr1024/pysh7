@@ -1,6 +1,6 @@
 from typing import MutableSequence, TypeVar, override
 from pysh.core.errors.error import Error
-from pysh.core.processor import nary_rule, rule, state_and_result
+from pysh.core.processor import nary_rule, rule
 
 _State = TypeVar("_State")
 _Result = TypeVar("_Result", covariant=True)
@@ -8,9 +8,7 @@ _Result = TypeVar("_Result", covariant=True)
 
 class Or(nary_rule.NaryRule[_State, _Result, _Result]):
     @override
-    def __call__(
-        self, state: _State
-    ) -> state_and_result.StateAndResult[_State, _Result]:
+    def __call__(self, state: _State) -> tuple[_State, _Result]:
         errors: MutableSequence[Error] = []
         for child in self:
             try:

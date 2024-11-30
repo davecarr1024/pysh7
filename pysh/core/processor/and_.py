@@ -1,5 +1,5 @@
 from typing import MutableSequence, Sequence, TypeVar, override
-from pysh.core.processor import nary_rule, rule, state_and_result
+from pysh.core.processor import nary_rule, rule
 
 _State = TypeVar("_State")
 _ChildResult = TypeVar("_ChildResult", covariant=True)
@@ -7,17 +7,12 @@ _ChildResult = TypeVar("_ChildResult", covariant=True)
 
 class And(nary_rule.NaryRule[_State, Sequence[_ChildResult], _ChildResult]):
     @override
-    def __call__(
-        self, state: _State
-    ) -> state_and_result.StateAndResult[_State, Sequence[_ChildResult]]:
+    def __call__(self, state: _State) -> tuple[_State, Sequence[_ChildResult]]:
         child_results: MutableSequence[_ChildResult] = []
         for child in self:
-            child_state_and_result = self._try(lambda: child(state))
-            state = child_state_and_result.state
-            child_results.append(child_state_and_result.result)
-        return state_and_result.StateAndResult[_State, Sequence[_ChildResult]](
-            state, child_results
-        )
+            state, child_result = self._try(lambda: child(state))
+            child_results.append(child_result)
+        return state, child_results
 
     @override
     def __and__[

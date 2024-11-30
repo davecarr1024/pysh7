@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import Callable, override
 
 from pysh.core.processor.rule import Rule
-from pysh.core.processor.state_and_result import StateAndResult
 from pysh.core.processor.unary_rule import UnaryRule
 
 
@@ -12,10 +11,10 @@ class Transformer[State, Result, ChildResult](UnaryRule[State, Result, ChildResu
     def _transform(self, child_result: ChildResult) -> Result: ...
 
     @override
-    def __call__(self, state: State) -> StateAndResult[State, Result]:
-        child_state_and_result = self._call_child(state)
-        result = self._try(lambda: self._transform(child_state_and_result.result))
-        return StateAndResult[State, Result](child_state_and_result.state, result)
+    def __call__(self, state: State) -> tuple[State, Result]:
+        state, child_result = self._try_child(state)
+        result = self._try(lambda: self._transform(child_result))
+        return state, result
 
 
 @dataclass(frozen=True, kw_only=True)

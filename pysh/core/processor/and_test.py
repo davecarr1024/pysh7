@@ -10,4 +10,4 @@ def test_and(subtests):
         ((Literal(1) & Literal(2)) & (Literal(3) & Literal(4)), [1, 2, 3, 4]),
     ]:
         with subtests.test(rule=rule, expected=expected):
-            assert rule(None).result == expected
+            assert rule(None) == (None, expected)
