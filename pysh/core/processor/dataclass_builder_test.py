@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from pysh.core.processor.dataclass_builder import (
-    Field,
     build_dataclass,
 )
 from pysh.core.processor.literal import Literal
@@ -11,11 +10,6 @@ from pysh.core.processor.literal import Literal
 class Object:
     i: int = 0
     s: str = ""
-
-
-def test_field():
-    assert Field("i", 1).set(Object()) == Object(i=1)
-    assert Field("s", "a").set(Object()) == Object(s="a")
 
 
 def test_build_dataclass():

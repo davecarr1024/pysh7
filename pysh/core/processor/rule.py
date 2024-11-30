@@ -26,9 +26,11 @@ class Rule(Generic[_State, _Result], ABC, Errorable):
     def drop_result(self) -> "Rule[_State,None]":
         return self.transform(lambda _: None)
 
-    def as_field(self, name: str) -> "Rule[_State,dataclass_builder.Field[_Result]]":
+    def as_field(
+        self, name: str
+    ) -> "Rule[_State,dataclass_field.DataclassFieldSetter[_Result]]":
         return self.transform(
-            lambda result: dataclass_builder.Field[_Result](name, result)
+            lambda result: dataclass_field.DataclassField[_Result](name).setter(result),
         )
 
     def __and__[
@@ -50,4 +52,4 @@ class Rule(Generic[_State, _Result], ABC, Errorable):
                 return or_.or_(self, rhs)
 
 
-from pysh.core.processor import transformer, zero_or_more, dataclass_builder, and_, or_
+from pysh.core.processor import transformer, zero_or_more, dataclass_field, and_, or_

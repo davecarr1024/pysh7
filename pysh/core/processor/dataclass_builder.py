@@ -1,36 +1,20 @@
 import dataclasses
-from typing import Sequence, override
+from typing import Sequence, Union, override
 
-from pysh.core.errors.errorable import Errorable
-from pysh.core.processor import rule, transformer
+from pysh.core.processor import dataclass_field, rule, transformer
 
-
-@dataclasses.dataclass(frozen=True)
-class Field[Value](Errorable):
-    name: str
-    value: Value
-
-    def set[Object](self, object: Object) -> Object:
-        if not dataclasses.is_dataclass(object):
-            raise self._error(msg=f"setting field on non-dataclass {object}")
-        if not any(field.name == self.name for field in dataclasses.fields(object)):
-            raise self._error(
-                msg=f"trying to set unknown field {self.name} on dataclass {object}"
-            )
-        return dataclasses.replace(
-            object,  # type: ignore
-            **{self.name: self.value},
-        )
+type _ChildResult = Union[dataclass_field.DataclassFieldSetter, None]
+type _ChildResults = Sequence[_ChildResult]
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class DataclassBuilder[State, Result](
-    transformer.Transformer[State, Result, Sequence[Field | None]]
+    transformer.Transformer[State, Result, _ChildResults]
 ):
     result: Result
 
     @override
-    def _transform(self, child_result: Sequence[Field | None]) -> Result:
+    def _transform(self, child_result: _ChildResults) -> Result:
         result = self.result
         for field in child_result:
             if field is not None:
@@ -39,8 +23,12 @@ class DataclassBuilder[State, Result](
 
 
 def build_dataclass[
-    State, Result
-](result: Result, *children: rule.Rule[State, Field | None]) -> rule.Rule[
+    State,
+    Result,
+](
+    result: Result,
+    *children: rule.Rule[State, _ChildResult],
+) -> rule.Rule[
     State, Result
 ]:
     return DataclassBuilder[State, Result](result=result, child=and_.and_(*children))

@@ -65,6 +65,7 @@ def test_tail(subtests):
 
 
 def test_tail_with_type():
-    class _Stream(Stream): ...
+    class _Stream(Stream):
+        ...
 
     assert _Stream([1, 2, 3]).tail() == _Stream([2, 3])
